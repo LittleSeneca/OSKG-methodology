@@ -52,8 +52,9 @@ python3 ~/Projects/Personal/OSKG-methodology/bin/oskg build "<topic>" --budget 2
 
    This makes no calls and spends nothing. It prints per-phase allowances, expected artifact counts, and
    which phase is the binding constraint.
-3. **Say roughly how long it will take.** A $20 run is 60-90 model calls; expect a couple of hours
-   unattended. It is resumable, so an interrupt is not a loss.
+3. **Say roughly how long it will take.** It is slow: a measured $2 build was 36 calls over 5.5 hours,
+   because each call is a full agent turn doing real research. Budget most of a day for a $20 run, start
+   it in the morning, and leave it. It is resumable, so an interrupt is not a loss.
 
 ### While it runs
 

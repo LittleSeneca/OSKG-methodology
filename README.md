@@ -59,6 +59,28 @@ Phase 4 is the design's centre of gravity. The five structural analyses are comp
 with zero model calls; the model is then asked to *write up* a computed result rather than to discover one.
 That is what makes the synthesis auditable — and nearly free, which is what makes the budget work.
 
+## A validated run
+
+The first end-to-end build, on *the Antikythera mechanism: construction, function, and dating*:
+
+| | |
+|---|---|
+| **Cost** | **$2.09** across 36 calls (cap was $4.00) |
+| **Wall clock** | 5.5 hours, unattended |
+| **Corpus** | 6 sources researched and acquired, 4 read |
+| **Graph** | 17 reading notes → **109 claims** → **291 edges** (2.67/claim, 50% cross-source) |
+| **Structure** | 0 orphans, 1 connected component, 25 hinges, 14 convergence points, 1 contradiction cluster |
+| **Output** | 5 analysis write-ups + a 2,238-word capstone citing 46 claims |
+| **Gates** | 1-5 all pass |
+
+The capstone found what the graph made visible and a reader would not: the corpus splits into two
+near-mirror camps — reconstruction/function versus eclipse/dating — joined by a **single bridge claim**
+about Babylonian eclipse records. It reported the dating dispute without resolving it, and noted that it is
+not even a *genuine unknown*, because neither side holds its position confidently. It also flagged that one
+convergence's "three-source breadth masks a single-author load."
+
+That is the whole argument for computing the synthesis instead of writing it.
+
 ## Install
 
 Requires Python 3.9+ and [Hermes](https://github.com/LittleSeneca/hermes) on your `PATH`. **No Python
@@ -120,6 +142,10 @@ oskg build --resume                       # continue in the current project dir
 oskg build --resume --budget 35           # raise the cap and continue
 oskg build --resume --from-phase 3        # redo edges onward
 ```
+
+**It is slow.** Each call is a full agent turn doing real research — the validated run above took 5.5 hours
+for $2.09. Budget most of a day for a $20 build, start it and leave it. An interrupt costs nothing but
+time.
 
 ## How the budget works
 

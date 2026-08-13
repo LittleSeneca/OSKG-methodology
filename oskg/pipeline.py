@@ -102,9 +102,17 @@ class PipelineContext:
     #: Set when `--from-phase` was given. Phases that would otherwise skip
     #: because their output already exists regenerate instead.
     forced: bool = False
+    _git_warned: bool = False
 
     def commit(self, message: str, outcome: PhaseOutcome | None = None) -> None:
         if not self.git_enabled or self.runner.is_dry:
+            return
+        if not gitutil.is_repo(self.project_dir):
+            # Scaffolded with --no-git and resumed without it. That is a choice,
+            # not a failure, and repeating it once per phase is just noise.
+            if not self._git_warned:
+                self._git_warned = True
+                self.log.info("not a git repository — skipping per-phase commits")
             return
         detail = ""
         if outcome:
@@ -112,7 +120,8 @@ class PipelineContext:
             if outcome.skipped:
                 detail += f", {len(outcome.skipped)} skipped"
         ok, out = gitutil.commit(self.project_dir, f"oskg: {message}{detail}")
-        if not ok:
+        if not ok and not self._git_warned:
+            self._git_warned = True
             self.log.warn(f"git commit failed: {out[:160]}")
 
 
