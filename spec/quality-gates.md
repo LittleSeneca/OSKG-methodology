@@ -76,6 +76,26 @@ committing extracted source text is the one failure that cannot be repaired afte
 | Claims per note within `claims_per_note` | `BAD_CLAIM_COUNT` | warn |
 | Topic tag on <3 claims | `SUSPECTED_SYNONYM` | warn |
 | Slug unique | `DUPLICATE_SLUG` | fatal |
+| Claims per 1k words of source ≤ 4x the corpus median | `OVER_EXTRACTED` | warn |
+| A `partial` source supplies ≤20% of all claims | `SECONDHAND_WEIGHT` | warn |
+
+### The density checks
+
+These two came out of auditing a real build, and they catch a failure every other gate passes.
+
+Acquisition marked Jones 2017 `partial` and retrieved a 1,682-word book review instead of the book. Every
+control worked: the stub said so, the review was named, and every claim's locator cited
+`BMCR 2018.05.16 ¶7` rather than an invented book page. Nothing was fabricated, and each claim was
+individually well-formed.
+
+But extraction drew **37 claims** from it — 22 per 1,000 words against 0.6-0.8 for the full papers — making
+the thinnest, most second-hand text the graph's largest single contributor at 34% of all claims. Those 37
+then counted equally toward convergence and hinges, and the capstone described Jones as though the book
+had been read.
+
+The problem was **weight, not honesty**, and no per-file check could see it, because the defect existed
+only in the aggregate. Both checks are warnings rather than errors: they need a human eye on the corpus,
+not a repair pass, since there is nothing malformed to repair.
 
 `BROKEN_LINK` is the check the whole gate suite exists for. Obsidian renders an unresolved wikilink as a
 dead link rather than an error, so a batch that used `claim_id` instead of the filename slug looks fine in

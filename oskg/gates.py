@@ -457,8 +457,66 @@ def _gate_claims(root: Path, manifest: Manifest, report: GateReport) -> None:
                 f"only {len(slugs)} claims — check it is not a synonym of an existing topic",
             )
 
+    _check_extraction_density(root, graph, report)
+
     report.stats["broken_links"] = len(graph.broken_links)
     report.stats["sources"] = len(graph.sources())
+
+
+# A source yielding far more claims per word than its peers has been
+# over-extracted. The failure this catches, seen in a real build: a `partial`
+# acquisition returned a 1,682-word book review instead of the book, and the
+# extraction drew 37 claims from it — 22 per 1,000 words against 0.6-0.8 for the
+# full papers — making the thinnest, most second-hand text the graph's largest
+# single contributor. Provenance was recorded honestly throughout; the problem
+# was weight, not honesty.
+DENSITY_RATIO = 4.0
+SECONDHAND_SHARE = 0.20
+
+
+def _check_extraction_density(root: Path, graph, report: GateReport) -> None:
+    from collections import Counter
+
+    words: dict[str, int] = {}
+    for path in (root / "sources").glob("*/_txt/*.txt"):
+        try:
+            words[path.stem] = len(path.read_text(encoding="utf-8", errors="ignore").split())
+        except OSError:
+            continue
+    if not words:
+        return
+
+    counts = Counter(c.source for c in graph.active_claims.values() if c.source)
+    density = {
+        src: counts[src] / w * 1000 for src, w in words.items() if w > 200 and counts.get(src)
+    }
+    if len(density) < 2:
+        return
+
+    ordered = sorted(density.values())
+    mid = len(ordered) // 2
+    # True median. Taking the upper-middle on an even count skews toward the
+    # outlier we are trying to detect, and let a 22-per-1k source slip past a
+    # 4x threshold in the build that motivated this check.
+    median = ordered[mid] if len(ordered) % 2 else (ordered[mid - 1] + ordered[mid]) / 2
+    for src, per_k in sorted(density.items(), key=lambda kv: -kv[1]):
+        if median > 0 and per_k > median * DENSITY_RATIO:
+            report.add(
+                "OVER_EXTRACTED", WARN, f"source/{src}",
+                f"{counts[src]} claims from {words[src]:,} words = {per_k:.1f} per 1k, "
+                f"{per_k / median:.0f}x the corpus median ({median:.1f}). Check the text on disk is the "
+                f"work itself and not a review, abstract, or summary of it.",
+            )
+
+    statuses = {s["slug"]: s.get("status", "") for s in parse_source_guide(root / "SOURCE-GUIDE.md")}
+    total = sum(counts.values())
+    for src, count in counts.items():
+        if statuses.get(src) == "partial" and total and count / total > SECONDHAND_SHARE:
+            report.add(
+                "SECONDHAND_WEIGHT", WARN, f"source/{src}",
+                f"a `partial` acquisition supplies {count}/{total} claims "
+                f"({count / total:.0%}) — second-hand text is outweighing fully-read sources",
+            )
 
 
 def _wikilink_target(value: str) -> str:

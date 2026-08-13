@@ -101,7 +101,15 @@ reads this section. If it is thin, the claims are thin, and no downstream phase 
 
 ## Depth calibration
 
-Not every source deserves the same treatment. Depth follows tier:
+**The tier sets the style; the text actually on disk sets the ceiling.** Phase 1 computes the word count of
+each source's extracted text and passes a binding budget into the prompt — roughly one note per 3,000 words
+and no more than one candidate claim per 400 words.
+
+That ceiling exists because tier alone is not enough. A `partial` acquisition of a Tier-2 monograph can be
+a 1,700-word review of it; given Tier-2 treatment ("every substantive chapter, 5-10 claims each") it
+produced 37 claims where the full papers yielded 16-29 each. See `spec/quality-gates.md` on `OVER_EXTRACTED`.
+
+Within that ceiling, depth follows tier:
 
 | Tier | Treatment |
 |---|---|

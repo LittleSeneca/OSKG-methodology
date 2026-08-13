@@ -166,6 +166,28 @@ See [spec/budget-model.md](spec/budget-model.md) for measured per-stage costs. A
 roughly 20-25 sources, 60-70 reading notes, 300-600 claims, 400-1,400 edges, five analyses, and a capstone.
 `--dry-run` prints the projection for your budget and names the binding constraint.
 
+## Where sources come from
+
+Acquisition tries, in order: the **local library** you configure, then open-access and public-domain
+retrieval, then a **command you configure**. Nothing else.
+
+```yaml
+# oskg.yaml
+acquisition:
+  local_library:                      # searched first — a hit costs nothing
+    - ~/Library/books
+    - ~/Zotero/storage
+  fetch_command: "my-fetcher --title {title} --author {author} --out {out}"
+```
+
+Local-library matching needs a distinctive title token *plus* the author, the year, or a filename matching
+the slug, and candidates are confirmed by the agent before use — a wrong match would attribute claims to a
+work nobody read. `fetch_command` runs as an argument vector, never through a shell.
+
+**`oskg` ships no acquisition backend beyond open-access retrieval.** `fetch_command` is where you plug in
+whatever you use; the acquisition prompt tells the agent not to improvise a route that is not configured,
+because where a work comes from is a decision to make once, in the manifest, not mid-run.
+
 ## What it does not do
 
 Worth stating plainly, because it runs unattended:

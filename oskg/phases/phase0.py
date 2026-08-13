@@ -95,6 +95,55 @@ class ScopingPhase(Phase):
             "phase0_sources.md",
             source_table=markdown_table(rows, ("slug", "title", "author", "year", "tier", "role")),
             max_sources=len(rows),
+            local_matches=self._local_matches(rows),
+            fetch_command=self._fetch_command_block(),
+        )
+
+    def _local_matches(self, rows: list[dict[str, Any]]) -> str:
+        """Candidate files already on disk, for the agent to confirm.
+
+        Offered, never auto-accepted: a wrong match attributes claims to a work
+        nobody read, which is the worst failure this pipeline can produce.
+        """
+        roots = self.manifest.local_library
+        if not roots:
+            return (
+                "_No `acquisition.local_library` configured. Set it in `oskg.yaml` to point at "
+                "directories of texts you already hold, and they will be searched before the web._"
+            )
+        from ..library import index_library, match_sources
+
+        files = index_library(roots)
+        if not files:
+            return f"_`acquisition.local_library` is set to {roots} but no readable files were found there._"
+
+        matches = match_sources(rows, files)
+        if not matches:
+            return f"_{len(files):,} local files searched; no candidate matched these sources._"
+
+        lines = [
+            f"{len(files):,} files searched in {roots}. **Candidates — verify each is really the work "
+            f"named before using it**, then extract it and mark the source `acquired`:",
+            "",
+        ]
+        for slug, found in sorted(matches.items()):
+            for m in found:
+                lines.append(f"- `{slug}` → `{m.path}`  _(match: {m.reason})_")
+        return "\n".join(lines)
+
+    def _fetch_command_block(self) -> str:
+        command = self.manifest.fetch_command
+        if not command:
+            return (
+                "_No `acquisition.fetch_command` configured. Set one in `oskg.yaml` to run your own "
+                "acquisition tool for sources that are neither local nor open-access._"
+            )
+        return (
+            f"An acquisition command is configured:\n\n```\n{command}\n```\n\n"
+            "Run it for any source you could not find locally or open-access, substituting `{{slug}}`, "
+            "`{{title}}`, `{{author}}`, `{{year}}` and `{{out}}` (the target `.txt` path). If it produces a "
+            "file, extract and mark the source `acquired`, and record in the stub that it came from this "
+            "command. If it does not, mark the source `unavailable` and move on."
         )
 
     def _sources(self) -> list[dict[str, Any]]:

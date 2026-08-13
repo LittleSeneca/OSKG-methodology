@@ -144,6 +144,22 @@ class Manifest:
     def min_tier(self) -> int:
         return int(self.scope.get("min_tier", 1))
 
+    # ── acquisition ─────────────────────────────────────────────────────
+    @property
+    def acquisition(self) -> dict[str, Any]:
+        return dict(self.data.get("acquisition") or {})
+
+    @property
+    def local_library(self) -> list[str]:
+        """Directories of already-obtained texts, searched before the web."""
+        raw = self.acquisition.get("local_library") or []
+        return [str(raw)] if isinstance(raw, str) else [str(p) for p in raw]
+
+    @property
+    def fetch_command(self) -> str:
+        """Operator-configured command for sources not found locally or open-access."""
+        return str(self.acquisition.get("fetch_command") or "")
+
     # ── budget ──────────────────────────────────────────────────────────
     @property
     def budget(self) -> dict[str, Any]:
@@ -348,6 +364,7 @@ def default_manifest(
             "rollover": True,
             "reserve_usd": 0.5,
         },
+        "acquisition": {"local_library": [], "fetch_command": ""},
         "model": {"default": model, "provider": provider, "per_phase": {}},
         "gates": dict(DEFAULT_GATES),
     }

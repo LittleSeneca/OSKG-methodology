@@ -68,6 +68,14 @@ scope:
   claims_per_note: [5, 10]         # [min, max]
   min_tier: 1                      # Lowest tier to attempt. Raised when budget is tight.
 
+# ── Acquisition ───────────────────────────────────────────────────────
+acquisition:
+  local_library:                   # list[str]. Directories of texts you already
+    - ~/Library/books              # hold. Searched BEFORE the web; a hit costs
+    - ~/Zotero/storage             # nothing and gives full text.
+  fetch_command: ""                # str. Command run for a source that is neither
+                                   # local nor open-access. See below.
+
 # ── Budget ────────────────────────────────────────────────────────────
 budget:
   total_usd: 20.00                 # float, required. HARD cap across the whole run.
@@ -122,6 +130,29 @@ high, the orchestrator raises `min_tier` (dropping Tier 4, then Tier 3) and reco
 
 **`gates.strict`** defaults to false so an unattended run degrades rather than dies. Set true for a run you
 intend to publish.
+
+**`acquisition.local_library`** is the highest-value setting in this file. Acquisition's best case needs no
+download at all: the text is already on your disk. Directories listed here are indexed and matched against
+the source list, and candidates are offered to the agent to confirm before use. Matching requires a
+distinctive title token *plus* the author surname, the year, or a filename matching the source slug —
+title overlap alone matches far too much, and a wrong match attributes claims to a work nobody read.
+
+**`acquisition.fetch_command`** is the extension point for everything else. It is a command template run
+once per source that could not be found locally or open-access:
+
+```yaml
+acquisition:
+  fetch_command: "/usr/local/bin/my-fetcher --title {title} --author {author} --year {year} --out {out}"
+```
+
+`{slug}`, `{title}`, `{author}`, `{year}` and `{out}` are substituted; `{out}` is the `.txt` path the
+command must write. It runs as an argument vector, never through a shell, so a title containing quotes or
+semicolons is data rather than a command. `oskg` reports only whether a file appeared.
+
+What that command does is the operator's decision and the operator's configuration. `oskg` ships no
+acquisition backend beyond open-access retrieval, and the acquisition prompt instructs the agent not to
+improvise a route that is not configured here — where a work comes from is a decision to make once, in
+this file, not mid-run.
 
 ## Validation
 

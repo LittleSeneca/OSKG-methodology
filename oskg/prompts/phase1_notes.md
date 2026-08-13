@@ -24,6 +24,17 @@ marked `unavailable` in `SOURCE-GUIDE.md`, skip it and say so — do not write a
    Reference material — catalogs, tables, stat blocks, control lists — gets **one index note**, not one
    note per entry.
 
+   **The tier sets the style; the text you actually have sets the ceiling.** These are binding:
+
+{length_budget}
+
+   Do not exceed them. A source whose acquisition came back `partial` may be a short review or summary of
+   the work rather than the work itself — read its stub in `sources/` before you start. If that is what it
+   is, say so in the note's opening line, extract only what the text in front of you actually states, and
+   never write a claim about the work that the text you have does not support. A thin source that yields
+   three careful claims is worth more than one that yields thirty inflated ones, because in the finished
+   graph those thirty outvote a full monograph.
+
 3. **Filename:** `<Source Short Name> — <Locator> — <Title>.md`. Pick the `{{domain}}` from
    `{note_domains}` by subject matter.
 
