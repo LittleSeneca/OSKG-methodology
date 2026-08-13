@@ -53,7 +53,7 @@ class EdgesPhase(Phase):
             return []
 
         keys = list(self._clusters)
-        affordable = self.budget.affordable(3, self.stage)
+        affordable = self.budget.affordable(3, self.stage) if self.budget.has_observations(self.stage) else 0
         if affordable and len(keys) > affordable:
             # Keep the clusters that span the most sources: those are where
             # cross-source edges — the ones that make the graph worth having —

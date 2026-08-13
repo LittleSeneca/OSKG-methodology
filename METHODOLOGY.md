@@ -179,7 +179,11 @@ is the constraint and the scope adapts to it.**
 
 The mechanism is measurement. Every model call runs through `hermes -z ... --usage-file`, which reports
 actual dollars spent per call. The orchestrator keeps a ledger, and after the first batch of any phase it
-knows the real cost per unit of work. It then sizes the remaining work to fit the phase's allocation:
+knows the real cost per unit of work. It then sizes the remaining work to fit the phase's allocation.
+
+Crucially, it sizes against *measurements*, not against its seed estimates. A phase that has not yet priced
+a real call plans its whole corpus and lets the loop stop naturally when the money runs out. Seeds are
+biased high on purpose, and a corpus trimmed against one is a corpus cut for no reason:
 
 ```
 affordable_units = phase_remaining_usd / observed_cost_per_unit

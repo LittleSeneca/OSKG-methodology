@@ -35,9 +35,16 @@ class ReadingNotesPhase(Phase):
             return []
 
         sources.sort(key=lambda s: (s["tier"], s["slug"]))
-        affordable = self.budget.affordable(1, self.stage)
-        if affordable and len(sources) > affordable:
-            sources = self._trim_by_tier(sources, affordable)
+
+        # Trim only against a measured cost. On a cold run the estimate is a
+        # seed biased high — acting on it drops sources the budget would have
+        # covered easily. The run loop stops cleanly at a batch boundary when
+        # the money really does run out, and because this list is already in
+        # tier order, the natural stop drops the lowest tiers anyway.
+        if self.budget.has_observations(self.stage):
+            affordable = self.budget.affordable(1, self.stage)
+            if affordable and len(sources) > affordable:
+                sources = self._trim_by_tier(sources, affordable)
         return [f"read:{s['slug']}" for s in sources]
 
     def _readable_sources(self) -> list[dict[str, Any]]:

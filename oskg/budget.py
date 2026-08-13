@@ -261,6 +261,16 @@ class Budget:
         current = self.estimate(stage)
         self._estimates[stage] = EWMA_ALPHA * cost + (1 - EWMA_ALPHA) * current
 
+    def has_observations(self, stage: str) -> bool:
+        """Has any call of `stage` actually been priced yet?
+
+        The difference between a seed and a measurement is the difference
+        between a guess and a fact, and up-front scope trimming must only ever
+        act on facts. Seeds are biased high on purpose; trimming a corpus
+        against one silently drops work the budget could easily have covered.
+        """
+        return bool(self.ledger.observations(stage))
+
     # ── admission control ───────────────────────────────────────────────
     def check(
         self, phase: int, stage: str, *, count: int = 1, ignore_phase_cap: bool = False

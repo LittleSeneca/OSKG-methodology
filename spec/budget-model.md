@@ -104,6 +104,14 @@ On `BudgetExhausted` the run stops, `state.json` records the phase and the pendi
 
 This is what turns "$20" into "a complete graph" rather than "a third of a graph."
 
+**Trim only against a measurement, never a seed.** A seed is a guess biased high; acting on one drops work
+the budget would have covered easily. Until a phase has priced at least one real call, it plans its whole
+corpus and lets the run loop stop naturally at a batch boundary — the work list is already in tier order,
+so the natural stop drops the lowest tiers anyway.
+
+The first live build is why this rule exists. The `notes` seed was $0.25 against a real $0.047, so Phase 1
+cut a third of the corpus before spending a cent, then finished having used $0.20 of a $1.34 allowance.
+
 After the first batch of a phase, cost per unit is known. The orchestrator then computes:
 
 ```

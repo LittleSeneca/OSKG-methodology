@@ -40,16 +40,18 @@ class ClaimsPhase(Phase):
         # attaches to, so extracting them first compounds across the phase.
         pending.sort(key=lambda d: (int(d.meta.get("source_tier") or 4), d.path.name))
 
-        affordable = self.budget.affordable(2, self.stage) * self.batch_size
-        if affordable and len(pending) > affordable:
-            dropped = pending[affordable:]
-            pending = pending[:affordable]
-            self.state.record_trim(
-                2,
-                "notes",
-                f"{len(dropped)} reading notes not extracted — budget covers ~{affordable}",
-                dropped=[d.path.name for d in dropped],
-            )
+        # As in Phase 1: only trim against a measured cost, never a seed.
+        if self.budget.has_observations(self.stage):
+            affordable = self.budget.affordable(2, self.stage) * self.batch_size
+            if affordable and len(pending) > affordable:
+                dropped = pending[affordable:]
+                pending = pending[:affordable]
+                self.state.record_trim(
+                    2,
+                    "notes",
+                    f"{len(dropped)} reading notes not extracted — budget covers ~{affordable}",
+                    dropped=[d.path.name for d in dropped],
+                )
         return [str(d.path.relative_to(self.root)) for d in pending]
 
     def build_prompt(self, batch: list[str]) -> str:
