@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oskg"
+version = "1.0.0"
+description = "Build an Open Source Knowledge Graph from one prompt, under a budget."
+readme = "README.md"
+requires-python = ">=3.9"
+license = { text = "MIT" }
+authors = [{ name = "Graham Brooks" }]
+keywords = ["knowledge-graph", "research", "claims", "orkg", "agent", "synthesis"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+]
+
+# Intentionally empty, and it should stay that way. `oskg` runs on a bare system
+# python3 with no venv, because the machine that runs an unattended overnight
+# build should not also need a maintained virtualenv. The YAML subset the
+# manifest and frontmatter need is implemented in oskg/yamlish.py.
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/LittleSeneca/OSKG-methodology"
+Methodology = "https://github.com/LittleSeneca/OSKG-methodology/blob/main/METHODOLOGY.md"
+
+[project.scripts]
+oskg = "oskg.cli:main"
+
+[tool.setuptools]
+packages = ["oskg", "oskg.phases"]
+
+[tool.setuptools.package-data]
+oskg = ["prompts/*.md"]

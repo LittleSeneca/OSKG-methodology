@@ -1,0 +1,39 @@
+# ── Copyright control ────────────────────────────────────────────────
+# Full-text source extracts are never committed or redistributed.
+# See METHODOLOGY.md §5. `oskg scaffold` writes the same rules into every
+# generated project.
+sources/**/_fulltext/
+sources/**/_txt/
+sources/**/_pdfs/
+
+# ── Pipeline working state ───────────────────────────────────────────
+# Ledger and state ARE committed in generated projects (they are the
+# reproducibility record); scratch is not.
+.oskg/tmp/
+.oskg/prompts/
+
+# ── Python ───────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.coverage
+htmlcov/
+build/
+dist/
+
+# ── Obsidian workspace (local only) ──────────────────────────────────
+.obsidian/workspace.json
+.obsidian/workspace-mobile.json
+.obsidian/graph.json
+.obsidian/appearance.json
+.obsidian/app.json
+.obsidian/hotkeys.json
+.obsidian/core-plugins.json
+.obsidian/community-plugins.json
+
+# ── OS ───────────────────────────────────────────────────────────────
+.DS_Store
+._*
+Thumbs.db
+.trash/
